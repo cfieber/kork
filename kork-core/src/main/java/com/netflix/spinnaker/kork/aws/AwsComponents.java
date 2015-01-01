@@ -18,11 +18,13 @@ package com.netflix.spinnaker.kork.aws;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnClass(AWSCredentialsProvider.class)
 public class AwsComponents {
     @Bean
     @ConditionalOnMissingBean(AWSCredentialsProvider.class)

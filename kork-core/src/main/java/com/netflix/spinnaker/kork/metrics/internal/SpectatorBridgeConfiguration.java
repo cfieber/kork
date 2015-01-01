@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Netflix, Inc.
+ * Copyright 2015 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,31 @@
  * limitations under the License.
  */
 
-package com.netflix.spinnaker.kork.metrics;
+package com.netflix.spinnaker.kork.metrics.internal;
 
 import com.netflix.spectator.api.ExtendedRegistry;
-import com.netflix.spectator.api.Registry;
-import com.netflix.spectator.api.Spectator;
-import com.netflix.spinnaker.kork.metrics.internal.SpectatorBridgeConfiguration;
 import org.springframework.boot.actuate.metrics.writer.CompositeMetricWriter;
 import org.springframework.boot.actuate.metrics.writer.MetricWriter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
 import java.util.List;
 
 @Configuration
-@ConditionalOnClass(ExtendedRegistry.class)
-@Import(SpectatorBridgeConfiguration.class)
-public class SpectatorConfiguration {
-
+public class SpectatorBridgeConfiguration {
   @Bean
-  @ConditionalOnMissingBean(ExtendedRegistry.class)
-  ExtendedRegistry extendedRegistry() {
-    return Spectator.registry();
+  MetricWriter spectatorMetricWriter(ExtendedRegistry extendedRegistry) {
+    return new SpectatorMetricWriter(extendedRegistry);
   }
 
   @Bean
-  @ConditionalOnMissingBean(Registry.class)
-  Registry registry() {
-    return Spectator.registry();
+  @Primary
+  @ConditionalOnMissingClass(name = "org.springframework.messaging.MessageChannel")
+  @ConditionalOnMissingBean(name = "primaryMetricWriter")
+  public MetricWriter primaryMetricWriter(List<MetricWriter> writers) {
+    return new CompositeMetricWriter(writers);
   }
 }

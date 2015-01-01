@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.netflix.spinnaker.kork.metrics;
+package com.netflix.spinnaker.kork.metrics.internal;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.netflix.spectator.api.ExtendedRegistry;
