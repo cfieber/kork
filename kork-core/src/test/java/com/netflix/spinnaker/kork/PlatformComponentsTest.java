@@ -29,6 +29,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.ClassPathResource;
@@ -64,6 +65,7 @@ public class PlatformComponentsTest {
   }
 
   @Configuration
+  @PropertySource("classpath:/test.properties")
   public static class BaseApplicationContext {
 
     @Autowired
@@ -72,16 +74,6 @@ public class PlatformComponentsTest {
     @Bean
     static PropertySourcesPlaceholderConfigurer ppc() {
       return new PropertySourcesPlaceholderConfigurer();
-    }
-
-    @PostConstruct
-    public void initialize() {
-      EncodedResource testProps = new EncodedResource(new ClassPathResource("/test.properties"));
-      try {
-        ctx.getEnvironment().getPropertySources().addFirst(new ResourcePropertySource("test", testProps));
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
 }
