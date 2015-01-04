@@ -16,16 +16,18 @@
 
 package com.netflix.spinnaker.kork.eureka.internal;
 
-import com.google.inject.Provider;
 import com.netflix.appinfo.CloudInstanceConfig;
 import com.netflix.appinfo.EurekaInstanceConfig;
+import com.netflix.appinfo.PropertiesInstanceConfig;
 import com.netflix.discovery.DefaultEurekaClientConfig;
 import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClientConfig;
 import com.netflix.eventbus.impl.EventBusImpl;
 import com.netflix.eventbus.spi.EventBus;
 import com.netflix.eventbus.spi.InvalidSubscriberException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.endpoint.HealthEndpoint;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -33,9 +35,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertiesPropertySource;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 @Configuration
 public class EurekaBootstrapConfiguration {
@@ -46,11 +52,26 @@ public class EurekaBootstrapConfiguration {
   @Value("${eureka.client.namespace:netflix.discovery.}")
   String eurekaClientConfigNamespace;
 
+  @Autowired
+  ConfigurableEnvironment configurableEnvironment;
+
   @Bean
   @ConditionalOnMissingBean(EurekaInstanceConfig.class)
   public EurekaInstanceConfig eurekaInstanceConfig() {
+    String prefix = fixNamespace(eurekaInstanceConfigNamespace);
+    Properties defaults = new Properties();
+    defaults.put(prefix + "name", System.getProperty("spring.config.name", "unknown"));
+    if (System.getProperties().containsKey("server.port")) {
+      defaults.put(prefix + "port", System.getProperty("server.port", "8080"));
+    }
+    //TODO(cfieber)-do more with the Archaius DeploymentContext
+
+    configurableEnvironment.getPropertySources().addLast(new PropertiesPropertySource("eurekaBootMapping", defaults));
+
     return new CloudInstanceConfig(fixNamespace(eurekaInstanceConfigNamespace));
   }
+
+
 
   @Bean
   @ConditionalOnMissingBean(EventBus.class)

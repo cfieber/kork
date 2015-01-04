@@ -16,23 +16,20 @@
 
 package com.netflix.spinnaker.kork.metrics.internal;
 
-import com.netflix.spectator.api.ExtendedRegistry;
 import org.springframework.boot.actuate.metrics.writer.CompositeMetricWriter;
 import org.springframework.boot.actuate.metrics.writer.MetricWriter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
 import java.util.List;
 
 @Configuration
+@Import(SpectatorMetricWriter.class)
 public class SpectatorBridgeConfiguration {
-  @Bean
-  MetricWriter spectatorMetricWriter(ExtendedRegistry extendedRegistry) {
-    return new SpectatorMetricWriter(extendedRegistry);
-  }
 
   @Bean
   @Primary

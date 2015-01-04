@@ -16,7 +16,6 @@
 
 package com.netflix.spinnaker.kork.eureka.internal;
 
-import com.google.inject.Provider;
 import com.netflix.appinfo.HealthCheckHandler;
 import com.netflix.appinfo.InstanceInfo;
 import org.springframework.boot.actuate.health.CompositeHealthIndicator;
@@ -26,12 +25,7 @@ import org.springframework.boot.actuate.health.Status;
 
 import java.util.Map;
 
-public class BootHealthCheckHandler implements HealthCheckHandler, Provider<HealthCheckHandler> {
-
-  @Override
-  public HealthCheckHandler get() {
-    return this;
-  }
+public class BootHealthCheckHandler implements HealthCheckHandler {
 
   private final HealthIndicator aggregateHealth;
 
