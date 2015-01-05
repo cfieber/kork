@@ -16,15 +16,18 @@
 
 package com.netflix.spinnaker.kork.archaius.internal;
 
-import com.netflix.config.ConcurrentCompositeConfiguration;
-import com.netflix.config.DynamicConfiguration;
-import com.netflix.config.FixedDelayPollingScheduler;
-import com.netflix.config.PolledConfigurationSource;
+import com.netflix.config.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertySource;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -59,6 +62,27 @@ public class ArchaiusBootstrapConfiguration {
   @Bean
   FixedDelayPollingScheduler springConfigurationPoller() {
     return new FixedDelayPollingScheduler(0, (int) TimeUnit.SECONDS.toMillis(30), false);
+  }
+
+  @Bean
+  Properties springBootDeploymentContextProperties() {
+    Properties props = new Properties();
+    if (System.getProperties().containsKey("spring.config.name")) {
+      props.setProperty(DeploymentContext.ContextKey.appId.getKey(), System.getProperty("spring.config.name"));
+    }
+
+    String environmentProfile = null;
+    for (String profile : environment.getActiveProfiles()) {
+      if (!("local".equals(profile) || "default".equals(profile))) {
+        environmentProfile = profile;
+        break;
+      }
+    }
+    if (environmentProfile != null) {
+      props.setProperty(DeploymentContext.ContextKey.environment.getKey(), environmentProfile);
+    }
+
+    return props;
   }
 
   @Bean

@@ -19,6 +19,7 @@ package com.netflix.spinnaker.kork.eureka.internal;
 import com.netflix.appinfo.CloudInstanceConfig;
 import com.netflix.appinfo.EurekaInstanceConfig;
 import com.netflix.appinfo.PropertiesInstanceConfig;
+import com.netflix.config.DeploymentContext;
 import com.netflix.discovery.DefaultEurekaClientConfig;
 import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClientConfig;
@@ -32,6 +33,7 @@ import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +41,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -55,16 +56,29 @@ public class EurekaBootstrapConfiguration {
   @Autowired
   ConfigurableEnvironment configurableEnvironment;
 
+  @Autowired(required = false)
+  ServerProperties serverProperties;
+
+  @Autowired
+  DeploymentContext deploymentContext;
+
   @Bean
   @ConditionalOnMissingBean(EurekaInstanceConfig.class)
   public EurekaInstanceConfig eurekaInstanceConfig() {
     String prefix = fixNamespace(eurekaInstanceConfigNamespace);
     Properties defaults = new Properties();
-    defaults.put(prefix + "name", System.getProperty("spring.config.name", "unknown"));
-    if (System.getProperties().containsKey("server.port")) {
-      defaults.put(prefix + "port", System.getProperty("server.port", "8080"));
+    if (deploymentContext.getApplicationId() != null) {
+      defaults.put(prefix + "name", deploymentContext.getApplicationId());
     }
-    //TODO(cfieber)-do more with the Archaius DeploymentContext
+    if (serverProperties.getSsl() != null) {
+      defaults.put(prefix + "port.enabled", "false");
+      defaults.put(prefix + "securePort", serverProperties.getPort().toString());
+      defaults.put(prefix + "securePort.enabled", true);
+    } else {
+      defaults.put(prefix + "port", serverProperties.getPort().toString());
+      defaults.put(prefix + "port.enabled", "true");
+      defaults.put(prefix + "securePort.enabled", false);
+    }
 
     configurableEnvironment.getPropertySources().addLast(new PropertiesPropertySource("eurekaBootMapping", defaults));
 

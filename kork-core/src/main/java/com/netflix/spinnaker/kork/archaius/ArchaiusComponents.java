@@ -17,23 +17,27 @@
 package com.netflix.spinnaker.kork.archaius;
 
 import com.netflix.config.ConfigurationManager;
+import com.netflix.config.DeploymentContext;
 import com.netflix.spinnaker.kork.archaius.internal.AggregatedConfigurationPropertySource;
 import com.netflix.spinnaker.kork.archaius.internal.ArchaiusBootstrapConfiguration;
 import org.apache.commons.configuration.AbstractConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.PropertiesPropertySource;
 
-import javax.annotation.PostConstruct;
+import java.util.Properties;
+
 
 @Configuration
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ConditionalOnClass(ConfigurationManager.class)
-//TODO(cfieber) @ConditionalOnExpression("!ConfigurationManager.isConfigurationInstalled()")
 @Import(ArchaiusBootstrapConfiguration.class)
 public class ArchaiusComponents {
 
@@ -46,9 +50,20 @@ public class ArchaiusComponents {
   @Autowired
   ConfigurableApplicationContext configurableApplicationContext;
 
-  @PostConstruct
-  public void installConfig() {
+  @Autowired
+  Properties springBootDeploymentContextProperties;
+
+  @Bean
+  AbstractConfiguration archaiusConfigInstance() {
     ConfigurationManager.install(archaiusConfiguration);
     configurableApplicationContext.getEnvironment().getPropertySources().addFirst(archaiusPropertySource);
+    configurableApplicationContext.getEnvironment().getPropertySources().addLast(new PropertiesPropertySource("bootDeploymentContextBridge", springBootDeploymentContextProperties));
+    return ConfigurationManager.getConfigInstance();
+  }
+
+  @Bean
+  @DependsOn("archaiusConfigInstance")
+  DeploymentContext archaiusDeploymentContext() {
+    return ConfigurationManager.getDeploymentContext();
   }
 }
