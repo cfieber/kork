@@ -18,6 +18,7 @@ package com.netflix.spinnaker.kork.eureka.internal;
 
 import com.netflix.appinfo.CloudInstanceConfig;
 import com.netflix.appinfo.EurekaInstanceConfig;
+import com.netflix.appinfo.MyDataCenterInstanceConfig;
 import com.netflix.appinfo.PropertiesInstanceConfig;
 import com.netflix.config.DeploymentContext;
 import com.netflix.discovery.DefaultEurekaClientConfig;
@@ -37,6 +38,7 @@ import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
@@ -63,6 +65,7 @@ public class EurekaBootstrapConfiguration {
   DeploymentContext deploymentContext;
 
   @Bean
+  @Profile("!local")
   @ConditionalOnMissingBean(EurekaInstanceConfig.class)
   public EurekaInstanceConfig eurekaInstanceConfig() {
     String prefix = fixNamespace(eurekaInstanceConfigNamespace);
@@ -70,19 +73,27 @@ public class EurekaBootstrapConfiguration {
     if (deploymentContext.getApplicationId() != null) {
       defaults.put(prefix + "name", deploymentContext.getApplicationId());
     }
-    if (serverProperties.getSsl() != null) {
-      defaults.put(prefix + "port.enabled", "false");
-      defaults.put(prefix + "securePort", serverProperties.getPort().toString());
-      defaults.put(prefix + "securePort.enabled", true);
-    } else {
-      defaults.put(prefix + "port", serverProperties.getPort().toString());
-      defaults.put(prefix + "port.enabled", "true");
-      defaults.put(prefix + "securePort.enabled", false);
+    if (serverProperties != null) {
+      if (serverProperties.getSsl() != null) {
+        defaults.put(prefix + "port.enabled", "false");
+        defaults.put(prefix + "securePort", serverProperties.getPort().toString());
+        defaults.put(prefix + "securePort.enabled", true);
+      } else {
+        defaults.put(prefix + "port", serverProperties.getPort().toString());
+        defaults.put(prefix + "port.enabled", "true");
+        defaults.put(prefix + "securePort.enabled", false);
+      }
     }
 
     configurableEnvironment.getPropertySources().addLast(new PropertiesPropertySource("eurekaBootMapping", defaults));
 
     return new CloudInstanceConfig(fixNamespace(eurekaInstanceConfigNamespace));
+  }
+
+  @Bean
+  @Profile("local")
+  public EurekaInstanceConfig localInstanceConfig() {
+    return new MyDataCenterInstanceConfig(fixNamespace(eurekaInstanceConfigNamespace));
   }
 
 

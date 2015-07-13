@@ -62,7 +62,7 @@ public class EurekaComponents {
 
   @Bean
   @ConditionalOnMissingBean(DiscoveryClient.class)
-  public DiscoveryClient discoveryClient(InstanceInfo instanceInfo, EurekaClientConfig eurekaClientConfig, DiscoveryClient.DiscoveryClientOptionalArgs discoveryClientOptionalArgs) {
-    return new DiscoveryClient(instanceInfo, eurekaClientConfig, discoveryClientOptionalArgs);
+  public DiscoveryClient discoveryClient(ApplicationInfoManager applicationInfoManager, EurekaClientConfig eurekaClientConfig, DiscoveryClient.DiscoveryClientOptionalArgs discoveryClientOptionalArgs) {
+    return new DiscoveryClient(applicationInfoManager, eurekaClientConfig, discoveryClientOptionalArgs);
   }
 }

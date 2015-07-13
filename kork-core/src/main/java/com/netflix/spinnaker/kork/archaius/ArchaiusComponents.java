@@ -16,10 +16,12 @@
 
 package com.netflix.spinnaker.kork.archaius;
 
+import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.config.DeploymentContext;
 import com.netflix.spinnaker.kork.archaius.internal.AggregatedConfigurationPropertySource;
 import com.netflix.spinnaker.kork.archaius.internal.ArchaiusBootstrapConfiguration;
+import jdk.nashorn.internal.runtime.regexp.joni.Config;
 import org.apache.commons.configuration.AbstractConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -55,7 +57,6 @@ public class ArchaiusComponents {
 
   @Bean
   AbstractConfiguration archaiusConfigInstance() {
-    ConfigurationManager.install(archaiusConfiguration);
     configurableApplicationContext.getEnvironment().getPropertySources().addFirst(archaiusPropertySource);
     configurableApplicationContext.getEnvironment().getPropertySources().addLast(new PropertiesPropertySource("bootDeploymentContextBridge", springBootDeploymentContextProperties));
     return ConfigurationManager.getConfigInstance();

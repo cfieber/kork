@@ -17,6 +17,7 @@
 package com.netflix.spinnaker.kork.archaius.internal;
 
 import com.netflix.config.*;
+import org.apache.commons.configuration.AbstractConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -92,8 +93,20 @@ public class ArchaiusBootstrapConfiguration {
 
   @Bean
   ConcurrentCompositeConfiguration archaiusConfiguration() {
-    ConcurrentCompositeConfiguration config = new ConcurrentCompositeConfiguration();
+    final ConcurrentCompositeConfiguration config;
+    if (ConfigurationManager.isConfigurationInstalled()) {
+      AbstractConfiguration cfg = ConfigurationManager.getConfigInstance();
+      if (!(cfg instanceof ConcurrentCompositeConfiguration)) {
+        throw new IllegalStateException("Archaius configuration already installed with unsupported type: " + cfg.getClass());
+      }
+      config = (ConcurrentCompositeConfiguration) cfg;
+      config.clear();
+    } else {
+      config = new ConcurrentCompositeConfiguration();
+      ConfigurationManager.install(config);
+    }
     config.addConfiguration(springConfiguration(), SPRING_ENVIRONMENT_BRIDGE);
+
     return config;
   }
 }
