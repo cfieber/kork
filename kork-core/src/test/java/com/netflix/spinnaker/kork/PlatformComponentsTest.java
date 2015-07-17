@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PlatformComponentsTest {
-
+/*
     @BeforeClass
     public static void init() {
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug");
@@ -110,5 +110,5 @@ public class PlatformComponentsTest {
             return a2;
         }
     }
-
+*/
 }

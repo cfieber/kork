@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @ConditionalOnMissingClass(name = {"com.netflix.config.NetflixConfiguration"})
-@Import({EurekaComponents.class, AwsComponents.class})
+@Import({AwsComponents.class})
 public class PlatformComponents {
 
 }

@@ -29,11 +29,11 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class StandardEurekaComponents {
-
+/*
     @Bean
     @ConditionalOnMissingBean(InstanceInfo.InstanceStatus.class)
     public InstanceInfo.InstanceStatus instanceStatus() {
         return InstanceInfo.InstanceStatus.UNKNOWN;
     }
-
+*/
 }

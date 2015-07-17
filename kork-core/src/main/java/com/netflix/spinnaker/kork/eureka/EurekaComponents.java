@@ -38,7 +38,7 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 @Import(StandardEurekaComponents.class)
 public class EurekaComponents {
-
+/*
     @Bean
     @Qualifier("appInfoManager")
     @ConditionalOnMissingBean(ApplicationInfoManager.class)
@@ -103,4 +103,5 @@ public class EurekaComponents {
             return ApplicationInfoManager.getInstance();
         }
     }
+    */
 }
