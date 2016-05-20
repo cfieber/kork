@@ -1,10 +1,13 @@
 dependencies {
-  compile spinnaker.dependency('springSecurityCore')
-  compile spinnaker.dependency('groovy')
-  spinnaker.group('spockBase')
-  spinnaker.group('jackson')
+  compile 'org.springframework.security:spring-security-core'
+  compile 'org.codehaus.groovy:groovy-all'
+  compile 'org.slf4j:slf4j-api'
 
-  compile spinnaker.dependency('slf4j')
+  compile 'com.fasterxml.jackson.core:jackson-core'
+  compile 'com.fasterxml.jackson.core:jackson-databind'
+  compile 'com.fasterxml.jackson.core:jackson-annotations'
+
+  testCompile 'org.spockframework:spock-core'
   testCompile 'ch.qos.logback:logback-classic:1.1.2'
 }
 

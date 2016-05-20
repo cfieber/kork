@@ -1,8 +1,24 @@
+dependencyManagement {
+  dependencies {
+    dependencySet(group:'com.netflix.astyanax', version: '3.8.0') {
+      entry 'astyanax-cassandra'
+      entry 'astyanax-cql'
+      entry 'astyanax-thrift'
+      entry 'astyanax-test'
+    }
+  }
+}
+
 dependencies {
   compile project(":kork-core")
-  compile spinnaker.dependency('bootAutoConfigure')
-  runtime 'org.hibernate:hibernate-validator:5.2.2.Final'
-  spinnaker.group('cassandra')
-  testRuntime spinnaker.dependency('slf4jSimple')
-  spinnaker.group('spockBase')
+  compile 'org.springframework.boot:spring-boot-starter-actuator'
+  runtime 'org.hibernate:hibernate-validator'
+
+  compile 'com.netflix.astyanax:astyanax-cassandra'
+  compile 'com.netflix.astyanax:astyanax-cql'
+  compile 'com.netflix.astyanax:astyanax-thrift'
+  compile 'com.netflix.astyanax:astyanax-test'
+  
+  testRuntime 'org.slf4j:slf4j-simple'
+  testCompile 'org.spockframework:spock-core'
 }

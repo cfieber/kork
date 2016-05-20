@@ -1,13 +1,19 @@
+apply plugin: 'java'
+
 dependencies {
-    compile spinnaker.dependency('bootAutoConfigure')
-    compile spinnaker.dependency('bootActuator')
-    compile spinnaker.dependency('archaiusCore')
-    compile spinnaker.dependency('eurekaClient')
-    compile spinnaker.dependency('awsCore')
-    compile spinnaker.dependency('spectatorApi')
-    compile spinnaker.dependency('spectatorAws')
-    compile spinnaker.dependency('spectatorGc')
-    compile spinnaker.dependency('spectatorJvm')
-    testCompile spinnaker.dependency('junit')
-    testRuntime spinnaker.dependency('slf4jSimple')
+    compile "org.springframework.boot:spring-boot-autoconfigure"
+    compile "org.springframework.boot:spring-boot-starter-actuator"
+
+   //spinbom
+    compile "com.netflix.archaius:archaius-core"
+    compile "com.netflix.eureka:eureka-client"
+
+   //spectator bom?
+    compile "com.netflix.spectator:spectator-api"
+    compile "com.netflix.spectator:spectator-ext-gc"
+    compile "com.netflix.spectator:spectator-ext-jvm"
+    compile "com.netflix.spectator:spectator-ext-aws"
+
+   // aws bom?
+    compile "com.amazonaws:aws-java-sdk-core"
 }

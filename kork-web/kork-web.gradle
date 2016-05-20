@@ -1,16 +1,30 @@
+dependencyManagement {
+  dependencies {
+    dependencySet(group: 'com.squareup.retrofit', version: '1.9.0') {
+      entry 'retrofit'
+      entry 'converter-jackson'
+    }
+    dependencySet(group: 'com.squareup.okhttp', version: '2.7.0') {
+      entry 'okhttp'
+      entry 'okhttp-apache'
+      entry 'okhttp-urlconnection'
+      entry 'mockwebserver'
+    }
+  }
+}
+
 dependencies {
   compile project(":kork-security")
 
-  compile spinnaker.dependency('bootWeb')
-  compile spinnaker.dependency('springSecurityCore')
-  compile spinnaker.dependency('spectatorApi')
-  compile spinnaker.dependency('groovy')
-  compile spinnaker.dependency('okHttp')
-  compile spinnaker.dependency('retrofit')
-  compile spinnaker.dependency('guava')
+  compile 'org.springframework.boot:spring-boot-starter-web'
+  compile 'org.springframework.security:spring-security-core'
+  compile 'com.netflix.spectator:spectator-api'
+  compile 'org.codehaus.groovy:groovy-all'
+  compile 'com.squareup.okhttp:okhttp'
+  compile 'com.squareup.retrofit:retrofit'
 
-
-  spinnaker.group('spockBase')
+  testCompile 'org.spockframework:spock-core'
+  testCompile 'cglib:cglib-nodep:3.2.2'
 }
 
 apply plugin: 'groovy'

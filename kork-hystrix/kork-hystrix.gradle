@@ -1,13 +1,22 @@
+dependencyManagement {
+  dependencies {
+    dependencySet(group: 'com.netflix.hystrix', version: '1.4.21') {
+      entry 'hystrix-core'
+      entry 'hystrix-javanica'
+    }
+  }
+}
+
 dependencies {
-  compile spinnaker.dependency('groovy')
-  compile spinnaker.dependency('spectatorApi')
+  compile 'org.codehaus.groovy:groovy-all'
+  compile 'com.netflix.spectator:spectator-api'
 
-  compile "org.springframework:spring-context:${spinnaker.version('spring')}"
-  compile "org.springframework:spring-beans:${spinnaker.version('spring')}"
-  compile 'com.netflix.hystrix:hystrix-core:1.4.21'
-  compile 'com.netflix.hystrix:hystrix-javanica:1.4.21'
+  compile 'org.springframework:spring-context'
+  compile 'org.springframework:spring-beans'
+  compile 'com.netflix.hystrix:hystrix-core'
+  compile 'com.netflix.hystrix:hystrix-javanica'
 
-  spinnaker.group('spockBase')
+  testCompile 'org.spockframework:spock-core'
 }
 
 apply plugin: 'groovy'
