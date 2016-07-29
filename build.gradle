@@ -32,8 +32,19 @@ allprojects {
 
   group = 'com.netflix.spinnaker.kork'
 
+  ext {
+    spinnakerDependenciesVersion = "0.50.0"
+  }
+
+  //support developing against a local dependenciesVersion
+  if (spinnakerDependenciesVersion.indexOf('-dev') != -1) {
+    repositories {
+      mavenLocal()
+    }
+  }
+
   spinnaker {
-    dependenciesVersion = "0.50.0"
+    dependenciesVersion = spinnakerDependenciesVersion
   }
 
   jacoco {
