@@ -1,3 +1,5 @@
+apply plugin: 'java'
+
 dependencyManagement {
   dependencies {
     dependencySet(group:'com.netflix.astyanax', version: '3.8.0') {

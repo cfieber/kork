@@ -1,3 +1,5 @@
+apply plugin: 'java'
+
 dependencies {
   compile 'redis.clients:jedis'
   compile 'com.github.kstyrc:embedded-redis:0.6'

@@ -1,10 +1,12 @@
+apply plugin: 'groovy'
+
 dependencyManagement {
   dependencies {
     dependencySet(group: 'com.squareup.retrofit', version: '1.9.0') {
       entry 'retrofit'
       entry 'converter-jackson'
     }
-    dependencySet(group: 'com.squareup.okhttp', version: '2.7.0') {
+    dependencySet(group: 'com.squareup.okhttp', version: '2.7.5') {
       entry 'okhttp'
       entry 'okhttp-apache'
       entry 'okhttp-urlconnection'
@@ -24,7 +26,5 @@ dependencies {
   compile 'com.squareup.retrofit:retrofit'
 
   testCompile 'org.spockframework:spock-core'
-  testCompile 'cglib:cglib-nodep:3.2.2'
+  testCompile 'cglib:cglib'
 }
-
-apply plugin: 'groovy'

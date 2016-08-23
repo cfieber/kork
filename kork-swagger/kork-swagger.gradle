@@ -1,6 +1,8 @@
+apply plugin: 'java'
+
 dependencyManagement {
   dependencies {
-    dependencySet(group: 'io.springfox', version: '2.2.2') {
+    dependencySet(group: 'io.springfox', version: '2.5.0') {
       entry 'springfox-swagger2'
       entry 'springfox-swagger-ui'
     }
