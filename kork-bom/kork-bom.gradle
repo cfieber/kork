@@ -1,0 +1,26 @@
+model {
+  publishing {
+    publications {
+      maven(MavenPublication) {
+        pom.withXml {
+          def root = asNode()
+          def depmgmt = root.children().find { it.name() == 'dependencyManagement' } ?: root.appendNode('dependencyManagement')
+          def deps = depmgmt.children().find { it.name() == 'dependencies' } ?: depmgmt.appendNode('dependencies')
+          project.rootProject.subprojects.each {
+            if (it.name != project.name) {
+              def dep = deps.appendNode('dependency')
+              dep.appendNode('groupId', it.group)
+              dep.appendNode('artifactId', it.name)
+              dep.appendNode('version', it.version)
+            }
+          }
+          def spinDeps = deps.children().find { it.get('artifactId')?.getAt(0)?.text() == 'spinnaker-dependencies' }
+          if (spinDeps) {
+            spinDeps.get('version')?.getAt(0)?.setValue('${spinnaker-dependencies.version}')
+            root.appendNode('properties').appendNode('spinnaker-dependencies.version', project.ext.spinnakerDependenciesVersion)
+          }
+        }
+      }
+    }
+  }
+}

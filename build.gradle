@@ -18,25 +18,64 @@ buildscript {
 
   repositories {
     jcenter()
-    maven { url 'http://dl.bintray.com/spinnaker/gradle/' }
+    maven { url "https://plugins.gradle.org/m2/" }
   }
   dependencies {
-    classpath 'com.netflix.spinnaker.gradle:spinnaker-gradle-project:3.5.0'
+    classpath 'com.netflix.nebula:gradle-resolution-rules-plugin:2.0.0'
+    classpath 'io.spring.gradle:dependency-management-plugin:0.6.1.RELEASE'
+    classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:4.3.0'
   }
 }
 
 allprojects {
-  apply plugin: 'spinnaker.project'
-  apply plugin: 'groovy'
+  group = 'com.netflix.spinnaker.kork'
+  version = '2.0.0-SNAPSHOT'
+
+  apply plugin: "nebula.resolution-rules"
+  apply plugin: "nebula.dependency-lock"
+  apply plugin: "io.spring.dependency-management" 
+  apply plugin: 'java'
+  apply plugin: 'maven-publish'
+  model {
+    publishing {
+      publications {
+        maven(MavenPublication) {
+          from components.java
+        }
+      }
+    }
+  }
+
   apply plugin: 'jacoco'
 
-  group = 'com.netflix.spinnaker.kork'
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
 
-  spinnaker {
-    dependenciesVersion = "0.50.0"
+  repositories {
+    mavenLocal()
+    jcenter()
+  }
+
+  ext['slf4j.version'] = '1.7.21'
+  ext {
+    spinnakerDependenciesVersion = '0.56.0-SNAPSHOT'
+  }
+
+  dependencyManagement {
+     imports {
+       mavenBom "com.netflix.spinnaker:spinnaker-dependencies:${project.ext.spinnakerDependenciesVersion}"
+     }
+  }
+
+  dependencies {
+    resolutionRules 'com.netflix.nebula:gradle-resolution-rules:latest.release'
+  }
+
+  nebulaResolutionRules {
+    optional = ['align-spring', 'slf4j-bridge']
   }
 
   jacoco {
-    toolVersion = '0.7.0.201403182114'
+    toolVersion = '0.7.7.201606060606'
   }
 }

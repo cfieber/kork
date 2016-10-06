@@ -1,6 +1,6 @@
 dependencies {
   compile project(":kork-core")
-  compile spinnaker.dependency('bootAutoConfigure')
+  compile 'org.springframework.boot:spring-boot-autoconfigure'
   runtime 'org.hibernate:hibernate-validator:5.2.2.Final'
   spinnaker.group('cassandra')
   testRuntime spinnaker.dependency('slf4jSimple')
