@@ -29,25 +29,37 @@ import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomi
 import org.springframework.boot.context.embedded.Ssl
 import org.springframework.boot.context.embedded.tomcat.TomcatConnectorCustomizer
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Slf4j
 @Configuration
-@EnableConfigurationProperties(ResolvedEnvironmentEndpoint)
+//@EnableConfigurationProperties(ResolvedEnvironmentEndpoint)
+@EnableConfigurationProperties
 class TomcatConfiguration {
-  @Value('${default.legacyServerPort:-1}')
-  int legacyServerPort
 
-  @Value('${default.apiPort:-1}')
-  int apiPort
+  static class TomcatDefaultProperties {
+    int legacyServerPort = -1
+    int apiPort = -1
+  }
 
-  //TODO(cfieber) remove this when https://github.com/spring-projects/spring-boot/issues/6171 is implemented
-  // the default value of null equates to no CRL file in the connector config so we don't have to null-check it
-  // below
-  @Value('${server.ssl.crlFile:#{null}}')
-  String crlFile
+  static class TomcatSslProperties {
+    String crlFile = null
+  }
+
+  @Bean
+  @ConfigurationProperties('default')
+  TomcatDefaultProperties tomcateDefaultProperties() {
+    new TomcatDefaultProperties()
+  }
+
+  @Bean
+  @ConfigurationProperties('server.ssl')
+  TomcatSslProperties tomcatSslProperties() {
+    new TomcatSslProperties()
+  }
 
   /**
    * Setup multiple connectors:
@@ -56,7 +68,7 @@ class TomcatConfiguration {
    */
   @Bean
   @ConditionalOnExpression('${server.ssl.enabled:false}')
-  EmbeddedServletContainerCustomizer containerCustomizer() throws Exception {
+  EmbeddedServletContainerCustomizer containerCustomizer(TomcatDefaultProperties tcDefaults, TomcatSslProperties tcSsl) throws Exception {
     return { ConfigurableEmbeddedServletContainer container ->
       TomcatEmbeddedServletContainerFactory tomcat = (TomcatEmbeddedServletContainerFactory) container
       //this will only handle the case where SSL is enabled on the main tomcat connector
@@ -66,26 +78,26 @@ class TomcatConfiguration {
           def handler = connector.getProtocolHandler()
           if (handler instanceof AbstractHttp11JsseProtocol) {
             if (handler.isSSLEnabled()) {
+              handler.setCrlFile(tcSsl.crlFile)
               handler.setSslImplementationName(BlacklistingSSLImplementation.name)
-              handler.setCrlFile(crlFile)
             }
           }
         }
       })
 
-      if (legacyServerPort > 0) {
-        log.info("Creating legacy connector on port ${legacyServerPort}")
+      if (tcDefaults.legacyServerPort > 0) {
+        log.info("Creating legacy connector on port ${tcDefaults.legacyServerPort}")
         def httpConnector = new Connector("org.apache.coyote.http11.Http11NioProtocol")
         httpConnector.setScheme("http")
-        httpConnector.setPort(legacyServerPort)
+        httpConnector.setPort(tcDefaults.legacyServerPort)
         tomcat.addAdditionalTomcatConnectors(httpConnector)
       }
 
-      if (apiPort > 0) {
-        log.info("Creating api connector on port ${apiPort}")
+      if (tcDefaults.apiPort > 0) {
+        log.info("Creating api connector on port ${tcDefaults.apiPort}")
         def apiConnector = new Connector("org.apache.coyote.http11.Http11NioProtocol")
         apiConnector.setScheme("https")
-        apiConnector.setPort(apiPort)
+        apiConnector.setPort(tcDefaults.apiPort)
 
         def ssl = new Ssl()
         tomcat.ssl.properties.each { k, v ->
@@ -96,7 +108,7 @@ class TomcatConfiguration {
         ssl.clientAuth = Ssl.ClientAuth.NEED
 
         Http11NioProtocol handler = apiConnector.getProtocolHandler() as Http11NioProtocol
-        handler.setCrlFile(crlFile)
+        handler.setCrlFile(tcSsl.crlFile)
         handler.setSslImplementationName(BlacklistingSSLImplementation.name)
 
         tomcat.configureSsl(handler, ssl)
