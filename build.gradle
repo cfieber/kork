@@ -58,18 +58,4 @@ allprojects {
   jacoco {
     toolVersion = '0.7.7.201606060606'
   }
-
-  configurations {
-    all {
-      resolutionStrategy {
-        eachDependency {
-          if (it.requested.group.startsWith('org.apache.tomcat')) {
-            it.useVersion spinnaker.version('tomcat')
-          }
-        }
-      }
-    }
-  }
-
-
 }

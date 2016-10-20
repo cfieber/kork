@@ -16,15 +16,14 @@
 
 package com.netflix.spinnaker.tomcat.x509;
 
-import org.apache.tomcat.util.net.AbstractEndpoint;
+import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.apache.tomcat.util.net.SSLUtil;
-import org.apache.tomcat.util.net.ServerSocketFactory;
 import org.apache.tomcat.util.net.jsse.JSSEImplementation;
 
 /**
  * An SSLImplementation that enforces a blacklist of client certificates.
  *
- * To enable the blacklist behavior, use the {{AbstractEndpoint}} {{crlFile}} property
+ * To enable the blacklist behavior, use the {{SSLHostConfigCertificate}} {{certificateRevocationListFile}} property
  * following the naming convention {{blacklist:/path/to/blacklist/file}}
  *
  * The format of the blacklist file is one entry per line conforming to
@@ -35,13 +34,10 @@ import org.apache.tomcat.util.net.jsse.JSSEImplementation;
  * revoked certificates.
  */
 public class BlacklistingSSLImplementation extends JSSEImplementation {
-  @Override
-  public ServerSocketFactory getServerSocketFactory(AbstractEndpoint<?> endpoint) {
-    return new BlacklistingJSSESocketFactory(endpoint);
-  }
+
 
   @Override
-  public SSLUtil getSSLUtil(AbstractEndpoint<?> endpoint) {
-    return new BlacklistingJSSESocketFactory(endpoint);
+  public SSLUtil getSSLUtil(SSLHostConfigCertificate certificate) {
+    return new BlacklistingJSSEUtil(certificate);
   }
 }
