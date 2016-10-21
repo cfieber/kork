@@ -29,37 +29,14 @@ import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomi
 import org.springframework.boot.context.embedded.Ssl
 import org.springframework.boot.context.embedded.tomcat.TomcatConnectorCustomizer
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory
-import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Slf4j
 @Configuration
-//@EnableConfigurationProperties(ResolvedEnvironmentEndpoint)
-@EnableConfigurationProperties
+@EnableConfigurationProperties(ResolvedEnvironmentEndpoint)
 class TomcatConfiguration {
-
-  static class TomcatDefaultProperties {
-    int legacyServerPort = -1
-    int apiPort = -1
-  }
-
-  static class TomcatSslProperties {
-    String crlFile = null
-  }
-
-  @Bean
-  @ConfigurationProperties('default')
-  TomcatDefaultProperties tomcateDefaultProperties() {
-    new TomcatDefaultProperties()
-  }
-
-  @Bean
-  @ConfigurationProperties('server.ssl')
-  TomcatSslProperties tomcatSslProperties() {
-    new TomcatSslProperties()
-  }
 
   /**
    * Setup multiple connectors:
@@ -68,7 +45,9 @@ class TomcatConfiguration {
    */
   @Bean
   @ConditionalOnExpression('${server.ssl.enabled:false}')
-  EmbeddedServletContainerCustomizer containerCustomizer(TomcatDefaultProperties tcDefaults, TomcatSslProperties tcSsl) throws Exception {
+  EmbeddedServletContainerCustomizer containerCustomizer(@Value('${default.legacyServerPort:-1}') int legacyServerPort,
+                                                         @Value('${default.apiPort:-1}') int apiPort,
+                                                         @Value('${server.ssl.crlFile:#{null}}') String crlFile) throws Exception {
     return { ConfigurableEmbeddedServletContainer container ->
       TomcatEmbeddedServletContainerFactory tomcat = (TomcatEmbeddedServletContainerFactory) container
       //this will only handle the case where SSL is enabled on the main tomcat connector
@@ -78,26 +57,26 @@ class TomcatConfiguration {
           def handler = connector.getProtocolHandler()
           if (handler instanceof AbstractHttp11JsseProtocol) {
             if (handler.isSSLEnabled()) {
-              handler.setCrlFile(tcSsl.crlFile)
+              handler.setCrlFile(crlFile)
               handler.setSslImplementationName(BlacklistingSSLImplementation.name)
             }
           }
         }
       })
 
-      if (tcDefaults.legacyServerPort > 0) {
-        log.info("Creating legacy connector on port ${tcDefaults.legacyServerPort}")
+      if (legacyServerPort > 0) {
+        log.info("Creating legacy connector on port ${legacyServerPort}")
         def httpConnector = new Connector("org.apache.coyote.http11.Http11NioProtocol")
         httpConnector.setScheme("http")
-        httpConnector.setPort(tcDefaults.legacyServerPort)
+        httpConnector.setPort(legacyServerPort)
         tomcat.addAdditionalTomcatConnectors(httpConnector)
       }
 
-      if (tcDefaults.apiPort > 0) {
-        log.info("Creating api connector on port ${tcDefaults.apiPort}")
+      if (apiPort > 0) {
+        log.info("Creating api connector on port ${apiPort}")
         def apiConnector = new Connector("org.apache.coyote.http11.Http11NioProtocol")
         apiConnector.setScheme("https")
-        apiConnector.setPort(tcDefaults.apiPort)
+        apiConnector.setPort(apiPort)
 
         def ssl = new Ssl()
         tomcat.ssl.properties.each { k, v ->
@@ -108,7 +87,7 @@ class TomcatConfiguration {
         ssl.clientAuth = Ssl.ClientAuth.NEED
 
         Http11NioProtocol handler = apiConnector.getProtocolHandler() as Http11NioProtocol
-        handler.setCrlFile(tcSsl.crlFile)
+        handler.setCrlFile(crlFile)
         handler.setSslImplementationName(BlacklistingSSLImplementation.name)
 
         tomcat.configureSsl(handler, ssl)
