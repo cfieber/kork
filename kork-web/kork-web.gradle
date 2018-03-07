@@ -2,17 +2,19 @@ dependencies {
   compile project(":kork-security")
   compile project(":kork-exceptions")
 
-  compile spinnaker.dependency('bootWeb')
-  compile spinnaker.dependency('springSecurityCore')
-  compile spinnaker.dependency('spectatorApi')
-  compile spinnaker.dependency('groovy')
-  compile spinnaker.dependency('okHttp')
-  compile spinnaker.dependency('retrofit')
-  compile spinnaker.dependency('guava')
+  compile "org.springframework.boot:spring-boot-starter-web:${versions.springBoot}"
+  compile "org.springframework.security:spring-security-core:${versions.springSecurity}"
+  compile "com.netflix.spectator:spectator-api:${versions.spectator}"
+  compile "org.codehaus.groovy:groovy-all:${versions.groovy}"
+  compile "com.squareup.okhttp:okhttp:${versions.okHttp}"
+  compile "com.squareup.retrofit:retrofit:${versions.retrofit}"
+  compile "com.google.guava:guava:${versions.guava}"
 
-  compileOnly spinnaker.dependency('bootActuator')
+  compile "org.springframework.boot:spring-boot-starter-actuator:${versions.springBoot}"
 
-  spinnaker.group('spockBase')
+  testCompile "org.spockframework:spock-core:${versions.spock}"
+  testCompile "org.objenesis:objenesis:${versions.objenesis}"
+  testCompile "cglib:cglib-nodep:${versions.cglib}"
 }
 
 apply plugin: 'groovy'

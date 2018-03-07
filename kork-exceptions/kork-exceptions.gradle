@@ -1,7 +1,8 @@
 dependencies {
-  spinnaker.group('spockBase')
-
-  testCompile spinnaker.dependency('groovy')
+  testCompile "org.codehaus.groovy:groovy-all:${versions.groovy}"
+  testCompile "org.spockframework:spock-core:${versions.spock}"
+  testCompile "org.objenesis:objenesis:${versions.objenesis}"
+  testCompile "cglib:cglib-nodep:${versions.cglib}"
 }
 
 apply plugin: 'groovy'

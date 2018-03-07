@@ -1,15 +1,17 @@
 dependencies {
-    compile spinnaker.dependency('bootAutoConfigure')
-    compile spinnaker.dependency('bootActuator')
-    compile spinnaker.dependency('archaiusCore')
-    compile spinnaker.dependency('eurekaClient')
-    compile spinnaker.dependency('awsCore')
-    compile spinnaker.dependency('spectatorApi')
-    compile spinnaker.dependency('spectatorAws')
-    compile spinnaker.dependency('spectatorGc')
-    compile spinnaker.dependency('spectatorJvm')
-    compile spinnaker.dependency('spectatorWebSpring')
+    compile "org.springframework.boot:spring-boot-autoconfigure:${versions.springBoot}"
 
-    testCompile spinnaker.dependency('junit')
-    testRuntime spinnaker.dependency('slf4jSimple')
+    compile "org.springframework.boot:spring-boot-starter-actuator:${versions.springBoot}"
+
+    compile "com.netflix.archaius:archaius-core:${versions.archaius}"
+    compile "com.netflix.eureka:eureka-client:${versions.eureka}"
+    compile "com.amazonaws:aws-java-sdk-core:${versions.aws}"
+    compile "com.netflix.spectator:spectator-api:${versions.spectator}"
+    compile "com.netflix.spectator:spectator-ext-aws:${versions.spectator}"
+    compile "com.netflix.spectator:spectator-ext-gc:${versions.spectator}"
+    compile "com.netflix.spectator:spectator-ext-jvm:${versions.spectator}"
+    compile "com.netflix.spectator:spectator-web-spring:${versions.spectator}"
+
+    testCompile "junit:junit:${versions.junit}"
+    testRuntime "org.slf4j:slf4j-simple:${versions.slf4j}"
 }

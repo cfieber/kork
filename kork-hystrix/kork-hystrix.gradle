@@ -1,13 +1,15 @@
 dependencies {
-  compile spinnaker.dependency('groovy')
-  compile spinnaker.dependency('spectatorApi')
+  compile  "com.netflix.spectator:spectator-api:${versions.spectator}"
 
-  compile "org.springframework:spring-context:${spinnaker.version('spring')}"
-  compile "org.springframework:spring-beans:${spinnaker.version('spring')}"
+  compile "org.springframework:spring-context:${versions.spring}"
+  compile "org.springframework:spring-beans:${versions.spring}"
   compile 'com.netflix.hystrix:hystrix-core:1.4.21'
   compile 'com.netflix.hystrix:hystrix-javanica:1.4.21'
 
-  spinnaker.group('spockBase')
+  compile  "org.codehaus.groovy:groovy-all:${versions.groovy}"
+  testCompile "org.spockframework:spock-core:${versions.spock}"
+  testCompile "org.objenesis:objenesis:${versions.objenesis}"
+  testCompile "cglib:cglib-nodep:${versions.cglib}"
 }
 
 apply plugin: 'groovy'

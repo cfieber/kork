@@ -1,5 +1,5 @@
 dependencies {
   compile project(":kork-core")
 
-  compileOnly spinnaker.dependency("lombok")
+  compileOnly "org.projectlombok:lombok:${versions.lombok}"
 }

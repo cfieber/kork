@@ -1,8 +1,17 @@
 dependencies {
   compile project(":kork-core")
-  compile spinnaker.dependency('bootAutoConfigure')
+  compile  "org.springframework.boot:spring-boot-autoconfigure:${versions.springBoot}"
   runtime 'org.hibernate:hibernate-validator:5.2.2.Final'
-  spinnaker.group('cassandra')
-  testRuntime spinnaker.dependency('slf4jSimple')
-  spinnaker.group('spockBase')
+  compile "com.netflix.astyanax:astyanax-cassandra:${versions.astyanax}"
+  compile "com.netflix.astyanax:astyanax-cql:${versions.astyanax}"
+  compile "com.netflix.astyanax:astyanax-thrift:${versions.astyanax}"
+  compile "com.netflix.astyanax:astyanax-test:${versions.astyanax}"
+
+  testRuntime "org.slf4j:slf4j-simple:${versions.slf4j}"
+
+  testCompile "org.spockframework:spock-core:${versions.spock}"
+  testCompile "org.objenesis:objenesis:${versions.objenesis}"
+  testCompile "cglib:cglib-nodep:${versions.cglib}"
 }
+
+apply plugin: 'groovy'

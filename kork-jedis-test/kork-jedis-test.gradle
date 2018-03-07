@@ -1,4 +1,4 @@
 dependencies {
-  compile spinnaker.dependency('jedis')
-  compile spinnaker.dependency('redisEmbedded')
+  compile "redis.clients:jedis:${versions.jedis}"
+  compile "com.netflix.spinnaker.embedded-redis:embedded-redis:${versions.redisEmbedded}"
 }

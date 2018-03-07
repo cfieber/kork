@@ -1,8 +1,12 @@
 dependencies {
-  compile spinnaker.dependency('bootActuator')
-  compile spinnaker.dependency('spectatorApi')
-  compile spinnaker.dependency('jedis')
+  compile "org.springframework.boot:spring-boot-starter-actuator:${versions.springBoot}"
+  compile "com.netflix.spectator:spectator-api:${versions.spectator}"
+  compile "redis.clients:jedis:${versions.jedis}"
 
-  testCompile spinnaker.dependency('groovy')
-  spinnaker.group('spockBase')
+  testCompile "org.codehaus.groovy:groovy-all:${versions.groovy}"
+  testCompile "org.spockframework:spock-core:${versions.spock}"
+  testCompile "org.objenesis:objenesis:${versions.objenesis}"
+  testCompile "cglib:cglib-nodep:${versions.cglib}"
 }
+
+apply plugin: 'groovy'

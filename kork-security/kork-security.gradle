@@ -1,11 +1,17 @@
 dependencies {
-  compile spinnaker.dependency('springSecurityCore')
-  compile spinnaker.dependency('groovy')
-  spinnaker.group('spockBase')
-  spinnaker.group('jackson')
+  compile "org.springframework.security:spring-security-core:${versions.springSecurity}"
+  compile "org.codehaus.groovy:groovy-all:${versions.groovy}"
+  testCompile "org.spockframework:spock-core:${versions.spock}"
+  testCompile "org.objenesis:objenesis:${versions.objenesis}"
+  testCompile "cglib:cglib-nodep:${versions.cglib}"
 
-  compile spinnaker.dependency('slf4j')
-  compile spinnaker.dependency('logbackClassic')
+  compile "com.fasterxml.jackson.core:jackson-annotations:${versions.jackson}"
+  compile "com.fasterxml.jackson.core:jackson-core:${versions.jackson}"
+  compile "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}"
+
+
+  compile "org.slf4j:jcl-over-slf4j:${versions.slf4j}"
+  compile  "ch.qos.logback:logback-classic:${versions.logback}"
 }
 
 apply plugin: 'groovy'
