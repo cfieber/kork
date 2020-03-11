@@ -21,12 +21,53 @@ plugins {
 
 allprojects {
   group = "com.netflix.spinnaker.kork"
+}
+
+subprojects {
   apply plugin: 'java-base'
+  apply plugin: 'maven-publish'
+
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
 
   repositories {
     jcenter()
   }
-}
 
+  publishing {
+    repositories {
+      maven {
+        name = 'tmpdir'
+        url = 'file:///Users/cfieber/tmp/maven'
+      }
+      maven {
+        name = 'bintray'
+        url = "https://api.bintray.com/maven/cfieber/buildtestrepo/koark"
+        credentials {
+          username = bintrayUser
+          password = bintrayKey
+        }
+      }
+    }
+  }
+
+  plugins.withType(JavaLibraryPlugin) {
+    publishing {
+      publications {
+        kork(MavenPublication) {
+            from components.java
+        }
+      }
+    }
+  }
+
+  plugins.withType(JavaPlatformPlugin) {
+    publishing {
+      publications {
+        kork(MavenPublication) {
+            from components.javaPlatform
+        }
+      }
+    }
+  }
+}
