@@ -16,8 +16,10 @@ protobuf {
   }
 }
 
+/*
 idea {
   module {
     generatedSourceDirs += file("${protobuf.generatedFilesBaseDir}/main/java")
   }
 }
+*/
