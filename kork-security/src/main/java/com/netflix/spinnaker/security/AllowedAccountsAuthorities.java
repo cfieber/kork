@@ -20,10 +20,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+/**
+ * @deprecated this is kind of a hack to coerce allowed accounts into granted authorities. A better
+ *     solution would be to supply a UserDetails or Authentication details that implements {{@link
+ *     HasAllowedAccounts}}.
+ */
+@Deprecated
 public class AllowedAccountsAuthorities {
   public static final String PREFIX = "ALLOWED_ACCOUNT_";
 
@@ -34,20 +41,17 @@ public class AllowedAccountsAuthorities {
       return Collections.emptySet();
     }
 
-    return userDetails.getAuthorities().stream()
-        .filter(a -> a.getAuthority().startsWith(PREFIX))
-        .collect(Collectors.toSet());
+    return filterGrantedAuthorities(userDetails.getAuthorities()).collect(Collectors.toSet());
   }
 
-  @SuppressWarnings("deprecation")
   public static Collection<String> getAllowedAccounts(UserDetails userDetails) {
-    if (userDetails instanceof User) {
-      return ((User) userDetails).getAllowedAccounts();
+    if (userDetails == null) {
+      return Collections.emptySet();
     }
-    return getAllowedAccountAuthorities(userDetails).stream()
-        .map(a -> a.getAuthority().substring(PREFIX.length()))
-        .sorted()
-        .collect(Collectors.toList());
+    if (userDetails instanceof HasAllowedAccounts) {
+      return ((HasAllowedAccounts) userDetails).getAllowedAccounts();
+    }
+    return getAllowedAccountsFromAuthorities(userDetails.getAuthorities());
   }
 
   public static Collection<GrantedAuthority> buildAllowedAccounts(Collection<String> accounts) {
@@ -62,5 +66,27 @@ public class AllowedAccountsAuthorities {
         .map(s -> PREFIX + s)
         .map(SimpleGrantedAuthority::new)
         .collect(Collectors.toSet());
+  }
+
+  /**
+   * Package-private for temporary access from DefaultAuthenticatedUserSupport.
+   *
+   * <p>This should go away once we have refactors all usages of AuthenticatedRequest accepting a
+   * principal on propagate..
+   */
+  static Collection<String> getAllowedAccountsFromAuthorities(
+      Collection<? extends GrantedAuthority> authorities) {
+    return filterGrantedAuthorities(authorities)
+        .map(a -> a.getAuthority().substring(PREFIX.length()))
+        .sorted()
+        .collect(Collectors.toList());
+  }
+
+  private static Stream<? extends GrantedAuthority> filterGrantedAuthorities(
+      Collection<? extends GrantedAuthority> authorities) {
+    if (authorities == null || authorities.isEmpty()) {
+      return Stream.empty();
+    }
+    return authorities.stream().filter(a -> a.getAuthority().startsWith(PREFIX));
   }
 }

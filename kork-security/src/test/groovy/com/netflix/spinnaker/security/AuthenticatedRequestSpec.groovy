@@ -39,12 +39,12 @@ class AuthenticatedRequestSpec extends Specification {
 
     then:
     AuthenticatedRequest.getSpinnakerAccounts().get() == "account1,account2"
-    AuthenticatedRequest.getSpinnakerAccounts(new User(allowedAccounts: ["account3", "account4"])).get() == "account3,account4"
+    AuthenticatedRequest.getSpinnakerAccounts(new User(allowedAccounts: ["account3", "account4"])).get() == ["account3", "account4"]
     AuthenticatedRequest.getSpinnakerAccounts(
       new org.springframework.security.core.userdetails.User(
         "username",
         "",
-        AllowedAccountsAuthorities.buildAllowedAccounts(["account3", "account4"]))).get() == "account3,account4"
+        AllowedAccountsAuthorities.buildAllowedAccounts(["account3", "account4"]))).get() == ["account3", "account4"]
   }
 
   void "should have no user/allowed account details if no MDC or Principal available"() {
