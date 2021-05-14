@@ -17,12 +17,12 @@
 package com.netflix.spinnaker.filters
 
 import com.netflix.spinnaker.kork.common.Header
-import com.netflix.spinnaker.security.AllowedAccountsAuthorities
 import com.netflix.spinnaker.security.AuthenticatedRequest
+import com.netflix.spinnaker.security.AuthenticatedUserSupport
+import com.netflix.spinnaker.security.DefaultAuthenticatedUserSupport
 import groovy.util.logging.Slf4j
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextImpl
-import org.springframework.security.core.userdetails.UserDetails
 
 import javax.servlet.Filter
 import javax.servlet.FilterChain
@@ -54,11 +54,29 @@ class AuthenticatedRequestFilter implements Filter {
   private final boolean extractSpinnakerUserOriginHeader
   private final boolean forceNewSpinnakerRequestId
   private final boolean clearAuthenticatedRequestPostFilter
+  private final AuthenticatedUserSupport authenticatedUserSupport
 
+  /**
+   * Temporary constructor to preserve backwards compatibilty for library consumers,
+   * specifically fiat.
+   *
+   * @deprecated use constructor with explicit AuthenticatedUserSupport injected from context
+   */
+  @Deprecated
   public AuthenticatedRequestFilter(boolean extractSpinnakerHeaders = false,
                                     boolean extractSpinnakerUserOriginHeader = false,
                                     boolean forceNewSpinnakerRequestId = false,
                                     boolean clearAuthenticatedRequestPostFilter = true) {
+    this(new DefaultAuthenticatedUserSupport(), extractSpinnakerHeaders, extractSpinnakerUserOriginHeader, forceNewSpinnakerRequestId, clearAuthenticatedRequestPostFilter);
+    log.warn("deprecated AuthenticationRequestFilter used, this prevents correct customization of AuthenticatedUserSupport and will break in a near future kork release.")
+  }
+
+  public AuthenticatedRequestFilter(AuthenticatedUserSupport authenticatedUserSupport,
+                                    boolean extractSpinnakerHeaders = false,
+                                    boolean extractSpinnakerUserOriginHeader = false,
+                                    boolean forceNewSpinnakerRequestId = false,
+                                    boolean clearAuthenticatedRequestPostFilter = true) {
+    this.authenticatedUserSupport = authenticatedUserSupport;
     this.extractSpinnakerHeaders = extractSpinnakerHeaders
     this.extractSpinnakerUserOriginHeader = extractSpinnakerUserOriginHeader
     this.forceNewSpinnakerRequestId = forceNewSpinnakerRequestId
@@ -70,7 +88,7 @@ class AuthenticatedRequestFilter implements Filter {
 
   @Override
   void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-    def spinnakerUser = null
+    String spinnakerUser = null
     def spinnakerAccounts = null
     HashMap<String, String> otherSpinnakerHeaders = new HashMap<>()
 
@@ -80,11 +98,16 @@ class AuthenticatedRequestFilter implements Filter {
       if (!securityContext) {
         securityContext = SecurityContextHolder.getContext()
       }
-
-      def principal = securityContext?.authentication?.principal
-      if (principal && principal instanceof UserDetails) {
-        spinnakerUser = principal.username
-        spinnakerAccounts = AllowedAccountsAuthorities.getAllowedAccounts(principal).join(",")
+      def authentication = securityContext.getAuthentication()
+      if (authentication) {
+        spinnakerUser = authenticatedUserSupport.getUsernameFromAuthentication(authentication).orElse(null)
+        if (spinnakerUser != null) {
+          spinnakerAccounts = authenticatedUserSupport.getAllowedAccountsFromAuthentication(authentication).map({accounts ->
+            accounts.findResults {account ->
+              account?.trim() ?: null
+            }.join(",")
+          }).orElse(null)
+        }
       }
     } catch (Exception e) {
       log.error("Unable to extract spinnaker user and account information", e)

@@ -19,6 +19,7 @@ package com.netflix.spinnaker.security
 import org.hamcrest.Matchers
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
 import spock.lang.Specification
 
 import static com.netflix.spinnaker.security.AllowedAccountsAuthorities.PREFIX
@@ -26,7 +27,7 @@ import static com.netflix.spinnaker.security.AllowedAccountsAuthorities.PREFIX
 class AllowedAccountsAuthoritiesSpec extends Specification {
   def "extracts allowed accounts from granted authorities"() {
     expect:
-    AllowedAccountsAuthorities.getAllowedAccounts(userDetails) == expected
+    Matchers.containsInAnyOrder(expected.toArray()).matches(AllowedAccountsAuthorities.getAllowedAccounts(userDetails))
 
     where:
     userDetails               || expected

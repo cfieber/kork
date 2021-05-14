@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  *     AuthenticatedRequest to switch users rather than supplying a principal directly.
  */
 @Deprecated
-public class User implements UserDetails {
+public class User implements UserDetails, HasAllowedAccounts, LegacyUserAttributes {
 
   public static final long serialVersionUID = 7392392099262597885L;
 
